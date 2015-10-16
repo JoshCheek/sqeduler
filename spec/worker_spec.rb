@@ -45,10 +45,20 @@ RSpec.describe Sqeduler::Worker do
 
       subject do
         threads = []
-        threads << Thread.new { FakeWorker.new.perform(work_time) }
         threads << Thread.new do
-          sleep wait_time
+          begin
+            puts "In the next thread"
+            sleep wait_time
+            FakeWorker.new.perform(work_time)
+          rescue => e
+            puts e
+            puts "After the last worker"
+          end
+        end
+        threads << Thread.new do
+          puts "In the first thread"
           FakeWorker.new.perform(work_time)
+          puts "after the first thread"
         end
         threads.each(&:join)
       end
@@ -60,7 +70,9 @@ RSpec.describe Sqeduler::Worker do
           let(:timeout) { work_time / 2 }
 
           it "one worker should be blocked" do
+            puts "Before subject"
             subject
+            puts "After subject"
             verify_callback_occured(FakeWorker::JOB_LOCK_FAILURE_PATH)
           end
 
