@@ -41,7 +41,7 @@ RSpec.describe Sqeduler::Worker do
       end
 
       let(:expiration) { work_time * 4 }
-      let(:work_time) { 0.1 }
+      let(:work_time) { 1.0 }
 
       subject do
         threads = []
